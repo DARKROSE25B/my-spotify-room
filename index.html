@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Spotify Room</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 50% 20%,
+                    #080808 0%,
+                    #595252 45%,
+                    #080808 100%
+                );
+
+            color: white;
+            font-family: 'Inter', sans-serif;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        /* ---------------- TITLE ---------------- */
+
+        .title-card h1 {
+            font-family: 'Inter', sans-serif;
+
+            font-size: 35px;
+            font-weight: 500;
+            letter-spacing: -1px;
+
+            margin-bottom: 8px;
+        }
+
+        .title-card p {
+            font-family: 'Inter', sans-serif;
+
+            color: #b3b3b3;
+            font-size: 16px;
+            font-weight: 400;
+
+            letter-spacing: -0.2px;
+        }
+
+        .title-card {
+            width: 90%;
+            max-width: 500px;
+
+            text-align: center;
+
+            background: linear-gradient(
+                145deg,
+                rgba(77, 71, 71, 0.98),
+                rgba(25, 25, 25, 0.96)
+            );
+
+            padding: 40px;
+
+            border-radius: 20px;
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            box-shadow:
+                0 15px 30px rgba(0, 0, 0, 0.45),
+                0 30px 70px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+            margin-bottom: 20px;
+        }
+
+        /* ---------------- TITLE ENTRANCE ---------------- */
+
+        .title-animation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            animation: titleFadeUp 0.8s ease-out both;
+        }
+
+        /* ---------------- PLAYLIST CARD ---------------- */
+
+        .playlist-card {
+            width: fit-content;
+
+            background: linear-gradient(
+                145deg,
+                rgba(52, 48, 48, 0.98),
+                rgba(25, 25, 25, 0.96)
+            );
+
+            padding: 40px;
+
+            border-radius: 20px;
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            box-shadow:
+                0 15px 30px rgba(0, 0, 0, 0.45),
+                0 30px 70px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+        .spotify-embed {
+            width: 100%;
+            max-width: 500px;
+
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ---------------- HOVER ---------------- */
+
+        .title-card,
+        .playlist-card {
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .title-card:hover,
+        .playlist-card:hover {
+            transform: translateY(-6px);
+
+            box-shadow:
+                0 20px 35px rgba(0, 0, 0, 0.5),
+                0 35px 80px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* ---------------- MOBILE ---------------- */
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 20px 10px;
+                gap: 15px;
+            }
+
+            .title-card {
+                width: 100%;
+                padding: 30px 20px;
+            }
+
+            .title-card h1 {
+                font-size: 28px;
+            }
+
+            .playlist-card {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .spotify-embed {
+                width: 100%;
+            }
+        }
+
+        /* ---------------- PLAYLIST ENTRANCE ---------------- */
+
+        .playlist-animation {
+            animation: playlistFadeUp 0.8s ease-out 0.15s both;
+        }
+
+        /* ---------------- ANIMATIONS ---------------- */
+
+        @keyframes titleFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes playlistFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TITLE CARD -->
+
+    <div class="title-animation">
+
+        <div class="title-card">
+            <h1>MY SPOTIFY ROOM</h1>
+        </div>
+
+    </div>
+
+
+    <!-- PLAYLIST CARD -->
+
+    <div class="playlist-animation">
+
+        <div class="playlist-card">
+
+            <div class="spotify-embed">
+
+                <div id="spotify-player">
+
+                    <iframe
+                        data-testid="embed-iframe"
+                        style="border-radius:12px"
+                        src="https://open.spotify.com/embed/playlist/03BHodwXOzNfHOfylzmmWY?utm_source=generator&theme=0"
+                        width="100%"
+                        height="352"
+                        frameborder="0"
+                        allowfullscreen
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy">
+                    </iframe>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
