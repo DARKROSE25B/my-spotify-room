@@ -190,7 +190,42 @@ body {
     .title-card h1 { font-size: 28px; }
     .playlist-card { width: 100%; padding: 20px; }
     .spotify-embed { width: 100%; }
+
+    /* --- ADD THIS PART --- */
+    .carousel {
+        width: 100vw;
+        height: 260px;
+    }
+
+    .slide.previous,
+    .slide.next {
+        display: none; /* no room to peek side-slides on mobile */
+    }
+
+    .slide.active {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .playlist-card iframe {
+        width: 90vw;
+        max-width: 340px;
+        height: 232px;
+    }
+
+    .arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+
+    .arrow.left { left: 8px; }
+    .arrow.right { right: 8px; }
 }
+
+body {
+    overflow-x: hidden;
+}
+
 
 .add-popup {
     display: none;
