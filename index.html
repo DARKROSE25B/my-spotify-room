@@ -202,6 +202,16 @@ body {
         display: none; /* no room to peek side-slides on mobile */
     }
 
+    .slide.far-previous {
+    transform: translate(calc(-50% - 760px), -50%) scale(0.65);
+    opacity: 0;
+}
+
+.slide.far-next {
+    transform: translate(calc(-50% + 760px), -50%) scale(0.65);
+    opacity: 0;
+}
+
     .slide.active {
         transform: translate(-50%, -50%) scale(1);
     }
@@ -225,7 +235,6 @@ body {
 body {
     overflow-x: hidden;
 }
-
 
 .add-popup {
     display: none;
@@ -317,51 +326,43 @@ const SUPABASE_KEY = "sb_publishable_y5cucyPlATIwRJd1hd2caA_zzSmxyus";
 </script>
 
 <script>
-let current = 0;
-let playlists = [];
-let moving = false;
-
+let current = 0, playlists = [], moving = false;
 const slidesBox = document.getElementById("slides");
 
 function spotifyURL(url) {
-    return url.replace(
-        "open.spotify.com/playlist/",
-        "open.spotify.com/embed/playlist/"
-    );
+    return url.replace("open.spotify.com/playlist/", "open.spotify.com/embed/playlist/");
 }
 
-function createSlide(index) {
+function index(i) {
+    return (i + playlists.length) % playlists.length;
+}
+
+function createSlide(i) {
     const slide = document.createElement("div");
     slide.className = "slide";
+    slide.dataset.index = i;
 
     slide.innerHTML = `
         <div class="playlist-card">
             <iframe
+                src="${spotifyURL(playlists[i].spotify_url)}"
                 width="500"
                 height="352"
                 frameborder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
             </iframe>
-        </div>
-    `;
-
-    slide.dataset.index = index;
-    slide.querySelector("iframe").src =
-        spotifyURL(playlists[index].spotify_url);
+        </div>`;
 
     return slide;
 }
 
 function setupCarousel() {
     slidesBox.innerHTML = "";
-
     if (!playlists.length) return;
 
-    const count = Math.min(5, playlists.length);
-
-    for (let i = 0; i < count; i++) {
-        slidesBox.appendChild(createSlide(i));
-    }
+    // Keep 5 playlists ready: 2 left, current, 2 right
+    for (let i = -2; i <= 2; i++)
+        slidesBox.appendChild(createSlide(index(current + i)));
 
     updatePositions();
 }
@@ -370,82 +371,56 @@ function updatePositions() {
     const total = playlists.length;
 
     [...slidesBox.children].forEach(slide => {
-        const index = Number(slide.dataset.index);
-        const distance = (index - current + total) % total;
+        const i = Number(slide.dataset.index);
+        let d = (i - current + total) % total;
+
+        if (d > total / 2) d -= total;
 
         slide.className = "slide";
 
-        if (distance === 0) {
-            slide.classList.add("active");
-            slide.style.opacity = "1";
-        }
-        else if (distance === total - 1) {
-            slide.classList.add("previous");
-            slide.style.opacity = "0.35";
-        }
-        else if (distance === 1) {
-            slide.classList.add("next");
-            slide.style.opacity = "0.35";
-        }
-        else {
-            slide.style.opacity = "0";
-            slide.style.pointerEvents = "none";
-        }
+        if (d === 0) slide.classList.add("active");
+        else if (d === -1) slide.classList.add("previous");
+        else if (d === 1) slide.classList.add("next");
+        else if (d === -2) slide.classList.add("far-previous");
+        else if (d === 2) slide.classList.add("far-next");
     });
 }
 
 function moveSlide(direction) {
     if (moving || playlists.length < 2) return;
-
     moving = true;
 
-    const total = playlists.length;
     const oldCurrent = current;
+    current = index(current + direction);
 
-    current = (current + direction + total) % total;
-
-    /*
-       Move the existing iframes first.
-       Nothing visible gets destroyed.
-    */
+    // First move the already-loaded cards
     updatePositions();
 
     setTimeout(() => {
+        const wanted = [];
 
-        const slides = [...slidesBox.children];
+        for (let i = -2; i <= 2; i++)
+            wanted.push(index(current + i));
 
-        /*
-           Find the slot that is now farthest away
-           and reuse it for the next playlist.
-        */
-        const needed = [];
+        // Reuse only cards that are outside our 5-card window
+        [...slidesBox.children].forEach(slide => {
+            const oldIndex = Number(slide.dataset.index);
 
-        for (let i = -2; i <= 2; i++) {
-            needed.push((current + i + total) % total);
-        }
-
-        slides.forEach(slide => {
-            const index = Number(slide.dataset.index);
-
-            if (!needed.includes(index)) {
-                let newIndex;
-
-                if (direction > 0)
-                    newIndex = (current + 2) % total;
-                else
-                    newIndex = (current - 2 + total) % total;
+            if (!wanted.includes(oldIndex)) {
+                const newIndex = direction > 0
+                    ? index(current + 2)
+                    : index(current - 2);
 
                 slide.dataset.index = newIndex;
-
                 slide.querySelector("iframe").src =
                     spotifyURL(playlists[newIndex].spotify_url);
             }
         });
 
+        // Fix positions without disturbing visible cards
         updatePositions();
         moving = false;
-
-    }, 500);
+    }, 520);
 }
 
 function openPopup() {
@@ -467,21 +442,15 @@ async function addPlaylist() {
 
     url = spotifyURL(url);
 
-    const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/playlists`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                apikey: SUPABASE_KEY,
-                Authorization: `Bearer ${SUPABASE_KEY}`
-            },
-            body: JSON.stringify({
-                name,
-                spotify_url: url
-            })
-        }
-    );
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/playlists`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`
+        },
+        body: JSON.stringify({ name, spotify_url: url })
+    });
 
     if (!res.ok) {
         alert("Supabase error: " + await res.text());
@@ -489,7 +458,6 @@ async function addPlaylist() {
     }
 
     closePopup();
-
     document.getElementById("playlistName").value = "";
     document.getElementById("playlistUrl").value = "";
 
@@ -514,7 +482,6 @@ async function loadPlaylists() {
 
     playlists = await res.json();
     current = 0;
-
     setupCarousel();
 }
 
